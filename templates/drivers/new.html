@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}ドライバー登録 | 道の縁{% endblock %}
+
+{% block content %}
+  <h1>ドライバー登録</h1>
+  <p>旅行者を乗せられる地域の方の情報を登録します。</p>
+
+  {% if error %}
+    <p class="error">{{ error }}</p>
+  {% endif %}
+
+  <form method="post">
+    <label for="name">お名前</label>
+    <input id="name" name="name" value="{{ request.form.get('name', '') }}" placeholder="例: ダリア" maxlength="50" required>
+
+    <label for="car_description">車の特徴・色</label>
+    <input id="car_description" name="car_description" value="{{ request.form.get('car_description', '') }}" placeholder="例: 白い軽自動車" maxlength="100" required>
+
+    <button type="submit">登録する</button>
+  </form>
+{% endblock %}
