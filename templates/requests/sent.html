@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t.request_sent }} | {{ t.app_name }}{% endblock %}
+
+{% block content %}
+  <h1>{{ t.request_sent }}</h1>
+  <p>{{ t.request_sent_intro }}</p>
+
+  <h2>{{ t.request_details }}</h2>
+  <ul>
+    <li>{{ t.people_count }}: {{ request_values.people_count }}</li>
+    <li>{{ t.gender }}: {{ request_values.gender }}</li>
+    <li>{{ t.age_group }}: {{ request_values.age_group }}</li>
+    <li>{{ t.pickup_location }}: {{ request_values.pickup_location }}</li>
+    <li>{{ t.destination }}: {{ request_values.destination }}</li>
+    <li>{{ t.requested_time }}: {{ request_values.requested_time }}</li>
+  </ul>
+
+  <p><a href="{{ url_for('new_request') }}">{{ t.make_another_request }}</a></p>
+{% endblock %}

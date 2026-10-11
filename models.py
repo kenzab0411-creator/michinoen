@@ -11,3 +11,13 @@ class BaseModel(Model):
 class Driver(BaseModel):
     name = CharField(max_length=50)
     car_description = CharField(max_length=100)
+
+
+class RideRequest(BaseModel):
+    people_count = CharField(max_length=10)
+    gender = CharField(max_length=10)
+    age_group = CharField(max_length=10)
+    pickup_location = CharField(max_length=50)
+    destination = CharField(max_length=100)
+    requested_time = CharField(max_length=20)
+    status = CharField(default="pending")

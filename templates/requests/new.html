@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t.request_ride }} | {{ t.app_name }}{% endblock %}
+
+{% block content %}
+  <h1>{{ t.request_ride }}</h1>
+  <p>{{ t.request_ride_intro }}</p>
+
+  {% if error %}
+    <p class="error">{{ error }}</p>
+  {% endif %}
+
+  <form method="post">
+    <label for="people_count">{{ t.people_count }}</label>
+    <select id="people_count" name="people_count" required>
+      <option value="">--</option>
+      <option value="1">{{ t.one_person }}</option>
+      <option value="2">{{ t.two_people }}</option>
+      <option value="3+">{{ t.three_or_more }}</option>
+    </select>
+
+    <fieldset>
+      <legend>{{ t.gender }}</legend>
+      <label><input type="radio" name="gender" value="male" required> {{ t.male }}</label>
+      <label><input type="radio" name="gender" value="female"> {{ t.female }}</label>
+      <label><input type="radio" name="gender" value="mixed"> {{ t.mixed }}</label>
+    </fieldset>
+
+    <label for="age_group">{{ t.age_group }}</label>
+    <select id="age_group" name="age_group" required>
+      <option value="">--</option>
+      <option value="teens">{{ t.teens }}</option>
+      <option value="twenties">{{ t.twenties }}</option>
+      <option value="thirties_or_more">{{ t.thirties_or_more }}</option>
+    </select>
+
+    <label for="pickup_location">{{ t.pickup_location }}</label>
+    <select id="pickup_location" name="pickup_location" required>
+      <option value="">--</option>
+      <option value="hiraizumi_station">{{ t.hiraizumi_station }}</option>
+      <option value="chusonji">{{ t.chusonji }}</option>
+      <option value="motsuji">{{ t.motsuji }}</option>
+    </select>
+
+    <label for="destination">{{ t.destination }}</label>
+    <input id="destination" name="destination" list="destinations" placeholder="{{ t.destination_example }}" maxlength="100" required>
+    <datalist id="destinations">
+      <option value="中尊寺 / Chuson-ji Temple">
+      <option value="毛越寺 / Motsu-ji Temple">
+      <option value="平泉駅 / Hiraizumi Station">
+    </datalist>
+
+    <fieldset>
+      <legend>{{ t.requested_time }}</legend>
+      <label><input type="radio" name="requested_time" value="now" required> {{ t.now }}</label>
+      <label><input type="radio" name="requested_time" value="15_minutes"> {{ t.within_15_minutes }}</label>
+      <label><input type="radio" name="requested_time" value="30_minutes"> {{ t.within_30_minutes }}</label>
+    </fieldset>
+
+    <button type="submit">{{ t.find_driver }}</button>
+  </form>
+{% endblock %}
