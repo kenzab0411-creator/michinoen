@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}登録済みドライバー | 道の縁{% endblock %}
+{% block title %}{{ t.registered_drivers }} | {{ t.app_name }}{% endblock %}
 
 {% block content %}
-  <h1>登録済みドライバー</h1>
+  <h1>{{ t.registered_drivers }}</h1>
 
   {% if drivers %}
     <ul>
@@ -12,8 +12,8 @@
       {% endfor %}
     </ul>
   {% else %}
-    <p>まだドライバーは登録されていません。</p>
+    <p>{{ t.no_drivers }}</p>
   {% endif %}
 
-  <p><a href="{{ url_for('new_driver') }}">ドライバーを登録する</a></p>
+  <p><a href="{{ url_for('new_driver') }}">{{ t.register_driver }}</a></p>
 {% endblock %}

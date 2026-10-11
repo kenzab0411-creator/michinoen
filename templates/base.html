@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja">
+<html lang="{{ locale }}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,7 +15,13 @@
     </style>
   </head>
   <body>
-    <header><a href="{{ url_for('new_driver') }}">道の縁</a></header>
+    <header>
+      <a href="{{ url_for('new_driver') }}">{{ t.app_name }}</a>
+      <nav aria-label="{{ t.language }}">
+        <a href="{{ url_for('set_language', locale='ja') }}" {% if locale == 'ja' %}aria-current="page"{% endif %}>日本語</a>
+        <a href="{{ url_for('set_language', locale='en') }}" {% if locale == 'en' %}aria-current="page"{% endif %}>English</a>
+      </nav>
+    </header>
     {% block content %}{% endblock %}
   </body>
 </html>
