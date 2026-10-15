@@ -12,7 +12,13 @@
     <li>{{ t.gender }}: {{ request_values.gender }}</li>
     <li>{{ t.age_group }}: {{ request_values.age_group }}</li>
     <li>{{ t.pickup_location }}: {{ request_values.pickup_location }}</li>
+    {% if ride_request.pickup_map_url %}
+      <li><a href="{{ ride_request.pickup_map_url }}" target="_blank" rel="noopener noreferrer">{{ t.open_map }}</a></li>
+    {% endif %}
     <li>{{ t.destination }}: {{ request_values.destination }}</li>
+    {% if ride_request.destination_map_url %}
+      <li><a href="{{ ride_request.destination_map_url }}" target="_blank" rel="noopener noreferrer">{{ t.open_map }}</a></li>
+    {% endif %}
     <li>{{ t.requested_time }}: {{ request_values.requested_time }}</li>
   </ul>
 

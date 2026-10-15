@@ -41,6 +41,8 @@
       <option value="中尊寺 / Chuson-ji Temple">
       <option value="毛越寺 / Motsu-ji Temple">
     </datalist>
+    <label for="pickup_map_url">{{ t.pickup_map_url }}</label>
+    <input id="pickup_map_url" name="pickup_map_url" type="url" placeholder="https://maps.google.com/..." maxlength="500">
 
     <label for="destination">{{ t.destination }}</label>
     <input id="destination" name="destination" list="destinations" placeholder="{{ t.destination_example }}" maxlength="100" required>
@@ -49,6 +51,8 @@
       <option value="毛越寺 / Motsu-ji Temple">
       <option value="平泉駅 / Hiraizumi Station">
     </datalist>
+    <label for="destination_map_url">{{ t.destination_map_url }}</label>
+    <input id="destination_map_url" name="destination_map_url" type="url" placeholder="https://maps.google.com/..." maxlength="500">
 
     <fieldset>
       <legend>{{ t.requested_time }}</legend>

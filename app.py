@@ -1,4 +1,5 @@
 from pathlib import Path
+from urllib.parse import urlparse
 
 from flask import Flask, redirect, render_template, request, session, url_for
 
@@ -41,11 +42,14 @@ TRANSLATIONS = {
         "thirties_or_more": "30代以上",
         "pickup_location": "出発地",
         "pickup_location_example": "例: 平泉駅、または自由に入力",
+        "pickup_map_url": "出発地のGoogle Mapsリンク（任意）",
         "hiraizumi_station": "平泉駅",
         "chusonji": "中尊寺",
         "motsuji": "毛越寺",
         "destination": "行き先",
         "destination_example": "例: 中尊寺、または自由に入力",
+        "destination_map_url": "行き先のGoogle Mapsリンク（任意）",
+        "open_map": "地図を開く",
         "requested_time": "希望の時間",
         "now": "今すぐ",
         "within_15_minutes": "15分以内",
@@ -55,6 +59,7 @@ TRANSLATIONS = {
         "request_sent_intro": "ドライバーからの返事をお待ちください。",
         "request_details": "リクエスト内容",
         "request_error": "すべての項目を入力・選択してください。",
+        "map_url_error": "地図リンクには http:// または https:// から始まるURLを入力してください。",
         "make_another_request": "別のリクエストを送る",
     },
     "en": {
@@ -87,11 +92,14 @@ TRANSLATIONS = {
         "thirties_or_more": "30 or older",
         "pickup_location": "Pickup location",
         "pickup_location_example": "e.g. Hiraizumi Station, or enter your own pickup location",
+        "pickup_map_url": "Google Maps link for pickup (optional)",
         "hiraizumi_station": "Hiraizumi Station",
         "chusonji": "Chuson-ji Temple",
         "motsuji": "Motsu-ji Temple",
         "destination": "Destination",
         "destination_example": "e.g. Chuson-ji Temple, or enter your own destination",
+        "destination_map_url": "Google Maps link for destination (optional)",
+        "open_map": "Open map",
         "requested_time": "Preferred time",
         "now": "Right now",
         "within_15_minutes": "Within 15 minutes",
@@ -101,6 +109,7 @@ TRANSLATIONS = {
         "request_sent_intro": "Please wait for a driver's reply.",
         "request_details": "Request details",
         "request_error": "Please complete all fields.",
+        "map_url_error": "Map links must start with http:// or https://.",
         "make_another_request": "Send another request",
     },
 }
@@ -117,6 +126,25 @@ def initialize_database():
     DATABASE_PATH.parent.mkdir(exist_ok=True)
     db.connect(reuse_if_open=True)
     db.create_tables([Driver, RideRequest])
+    add_ride_request_columns()
+
+
+def add_ride_request_columns():
+    """古いSQLiteデータベースにも地図リンク用の列を追加する。"""
+    columns = {column.name for column in db.get_columns("riderequest")}
+    new_columns = {
+        "pickup_map_url": "VARCHAR(500)",
+        "destination_map_url": "VARCHAR(500)",
+    }
+    for name, definition in new_columns.items():
+        if name not in columns:
+            db.execute_sql(f"ALTER TABLE riderequest ADD COLUMN {name} {definition}")
+
+
+def is_valid_map_url(value):
+    if not value:
+        return True
+    return urlparse(value).scheme in {"http", "https"}
 
 
 @app.route("/")
@@ -141,12 +169,29 @@ def new_request():
             "gender": request.form.get("gender", ""),
             "age_group": request.form.get("age_group", ""),
             "pickup_location": request.form.get("pickup_location", ""),
+            "pickup_map_url": request.form.get("pickup_map_url", "").strip() or None,
             "destination": request.form.get("destination", "").strip(),
+            "destination_map_url": request.form.get("destination_map_url", "").strip()
+            or None,
             "requested_time": request.form.get("requested_time", ""),
         }
 
-        if not all(fields.values()):
-            error = TRANSLATIONS[session.get("locale", "ja")]["request_error"]
+        required_fields = (
+            "people_count",
+            "gender",
+            "age_group",
+            "pickup_location",
+            "destination",
+            "requested_time",
+        )
+        text = TRANSLATIONS[session.get("locale", "ja")]
+        if not all(fields[name] for name in required_fields):
+            error = text["request_error"]
+        elif not all(
+            is_valid_map_url(fields[name])
+            for name in ("pickup_map_url", "destination_map_url")
+        ):
+            error = text["map_url_error"]
         else:
             ride_request = RideRequest.create(**fields)
             return redirect(url_for("request_sent", request_id=ride_request.id))
