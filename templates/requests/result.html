@@ -5,6 +5,12 @@
 {% block content %}
   <h1>{{ t.driver_response }}</h1>
 
+  {% if result_url %}
+    <h2>{{ t.save_result_url }}</h2>
+    <p>{{ t.save_result_url_intro }}</p>
+    <p><a href="{{ result_url }}">{{ result_url }}</a></p>
+  {% endif %}
+
   {% if ride_request.status == 'pending' %}
     <p>{{ t.waiting_for_response }}</p>
     <p><a href="{{ url_for('request_result', request_id=ride_request.id) }}">{{ t.refresh }}</a></p>

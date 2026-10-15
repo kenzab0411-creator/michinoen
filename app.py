@@ -81,6 +81,8 @@ TRANSLATIONS = {
         "declined_response": "今回は乗せられるドライバーが見つかりませんでした。",
         "car_description": "車の特徴",
         "meeting_code": "合言葉",
+        "save_result_url": "結果確認用URL",
+        "save_result_url_intro": "このURLを保存すると、後でドライバーからの返事を確認できます。",
     },
     "en": {
         "app_name": "Michi no En",
@@ -150,6 +152,8 @@ TRANSLATIONS = {
         "declined_response": "No driver is available for this ride right now.",
         "car_description": "Car description",
         "meeting_code": "Meeting code",
+        "save_result_url": "Result link",
+        "save_result_url_intro": "Save this link to check the driver's response later.",
     },
 }
 
@@ -177,16 +181,26 @@ def add_ride_request_columns():
         "driver_id": "INTEGER",
         "pickup_minutes": "VARCHAR(10)",
         "meeting_code": "VARCHAR(2)",
+        "access_token": "VARCHAR(64)",
     }
     for name, definition in new_columns.items():
         if name not in columns:
             db.execute_sql(f"ALTER TABLE riderequest ADD COLUMN {name} {definition}")
+    db.execute_sql(
+        "CREATE UNIQUE INDEX IF NOT EXISTS riderequest_access_token "
+        "ON riderequest (access_token) WHERE access_token IS NOT NULL"
+    )
 
 
 def is_valid_map_url(value):
     if not value:
         return True
     return urlparse(value).scheme in {"http", "https"}
+
+
+def create_access_token():
+    """旅行者だけが結果を確認するための推測されにくいURL用トークン。"""
+    return secrets.token_urlsafe(24)
 
 
 def localized_request_values(ride_request, text):
@@ -253,7 +267,7 @@ def new_request():
         ):
             error = text["map_url_error"]
         else:
-            ride_request = RideRequest.create(**fields)
+            ride_request = RideRequest.create(**fields, access_token=create_access_token())
             return redirect(url_for("request_result", request_id=ride_request.id))
 
     return render_template("requests/new.html", error=error)
@@ -277,7 +291,26 @@ def request_result(request_id):
     ride_request = RideRequest.get_or_none(RideRequest.id == request_id)
     if ride_request is None:
         return redirect(url_for("new_request"))
-    return render_template("requests/result.html", ride_request=ride_request)
+    return render_result_page(ride_request)
+
+
+@app.route("/requests/check/<access_token>")
+def check_request_result(access_token):
+    ride_request = RideRequest.get_or_none(RideRequest.access_token == access_token)
+    if ride_request is None:
+        return redirect(url_for("new_request"))
+    return render_result_page(ride_request)
+
+
+def render_result_page(ride_request):
+    result_url = None
+    if ride_request.access_token:
+        result_url = url_for(
+            "check_request_result", access_token=ride_request.access_token, _external=True
+        )
+    return render_template(
+        "requests/result.html", ride_request=ride_request, result_url=result_url
+    )
 
 
 @app.route("/driver/requests")
