@@ -1,4 +1,3 @@
-from pathlib import Path
 import secrets
 from urllib.parse import urlparse
 
