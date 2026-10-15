@@ -35,12 +35,12 @@
     </select>
 
     <label for="pickup_location">{{ t.pickup_location }}</label>
-    <select id="pickup_location" name="pickup_location" required>
-      <option value="">--</option>
-      <option value="hiraizumi_station">{{ t.hiraizumi_station }}</option>
-      <option value="chusonji">{{ t.chusonji }}</option>
-      <option value="motsuji">{{ t.motsuji }}</option>
-    </select>
+    <input id="pickup_location" name="pickup_location" list="pickup-locations" placeholder="{{ t.pickup_location_example }}" maxlength="100" required>
+    <datalist id="pickup-locations">
+      <option value="平泉駅 / Hiraizumi Station">
+      <option value="中尊寺 / Chuson-ji Temple">
+      <option value="毛越寺 / Motsu-ji Temple">
+    </datalist>
 
     <label for="destination">{{ t.destination }}</label>
     <input id="destination" name="destination" list="destinations" placeholder="{{ t.destination_example }}" maxlength="100" required>

@@ -40,6 +40,7 @@ TRANSLATIONS = {
         "twenties": "20代",
         "thirties_or_more": "30代以上",
         "pickup_location": "出発地",
+        "pickup_location_example": "例: 平泉駅、または自由に入力",
         "hiraizumi_station": "平泉駅",
         "chusonji": "中尊寺",
         "motsuji": "毛越寺",
@@ -85,6 +86,7 @@ TRANSLATIONS = {
         "twenties": "20s",
         "thirties_or_more": "30 or older",
         "pickup_location": "Pickup location",
+        "pickup_location_example": "e.g. Hiraizumi Station, or enter your own pickup location",
         "hiraizumi_station": "Hiraizumi Station",
         "chusonji": "Chuson-ji Temple",
         "motsuji": "Motsu-ji Temple",
@@ -160,13 +162,26 @@ def request_sent(request_id):
 
     text = TRANSLATIONS[session.get("locale", "ja")]
     people_count_keys = {"1": "one_person", "2": "two_people", "3+": "three_or_more"}
+    requested_time_keys = {
+        "now": "now",
+        "15_minutes": "within_15_minutes",
+        "30_minutes": "within_30_minutes",
+    }
+    legacy_pickup_keys = {
+        "hiraizumi_station": "hiraizumi_station",
+        "chusonji": "chusonji",
+        "motsuji": "motsuji",
+    }
     request_values = {
         "people_count": text[people_count_keys[ride_request.people_count]],
         "gender": text[ride_request.gender],
         "age_group": text[ride_request.age_group],
-        "pickup_location": text[ride_request.pickup_location],
+        "pickup_location": text.get(
+            legacy_pickup_keys.get(ride_request.pickup_location, ""),
+            ride_request.pickup_location,
+        ),
         "destination": ride_request.destination,
-        "requested_time": text[ride_request.requested_time],
+        "requested_time": text[requested_time_keys[ride_request.requested_time]],
     }
     return render_template(
         "requests/sent.html", ride_request=ride_request, request_values=request_values
