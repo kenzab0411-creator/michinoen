@@ -50,10 +50,6 @@ TRANSLATIONS = {
         "destination_example": "例: 中尊寺、または自由に入力",
         "destination_map_url": "行き先のGoogle Mapsリンク（任意）",
         "open_map": "地図を開く",
-        "requested_time": "希望の時間",
-        "now": "今すぐ",
-        "within_15_minutes": "15分以内",
-        "within_30_minutes": "30分以内",
         "find_driver": "乗せてくれる人を探す",
         "request_sent": "リクエストを送信しました",
         "request_sent_intro": "ドライバーからの返事をお待ちください。",
@@ -100,10 +96,6 @@ TRANSLATIONS = {
         "destination_example": "e.g. Chuson-ji Temple, or enter your own destination",
         "destination_map_url": "Google Maps link for destination (optional)",
         "open_map": "Open map",
-        "requested_time": "Preferred time",
-        "now": "Right now",
-        "within_15_minutes": "Within 15 minutes",
-        "within_30_minutes": "Within 30 minutes",
         "find_driver": "Find a driver",
         "request_sent": "Your request has been sent",
         "request_sent_intro": "Please wait for a driver's reply.",
@@ -173,7 +165,6 @@ def new_request():
             "destination": request.form.get("destination", "").strip(),
             "destination_map_url": request.form.get("destination_map_url", "").strip()
             or None,
-            "requested_time": request.form.get("requested_time", ""),
         }
 
         required_fields = (
@@ -182,7 +173,6 @@ def new_request():
             "age_group",
             "pickup_location",
             "destination",
-            "requested_time",
         )
         text = TRANSLATIONS[session.get("locale", "ja")]
         if not all(fields[name] for name in required_fields):
@@ -207,11 +197,6 @@ def request_sent(request_id):
 
     text = TRANSLATIONS[session.get("locale", "ja")]
     people_count_keys = {"1": "one_person", "2": "two_people", "3+": "three_or_more"}
-    requested_time_keys = {
-        "now": "now",
-        "15_minutes": "within_15_minutes",
-        "30_minutes": "within_30_minutes",
-    }
     legacy_pickup_keys = {
         "hiraizumi_station": "hiraizumi_station",
         "chusonji": "chusonji",
@@ -226,7 +211,6 @@ def request_sent(request_id):
             ride_request.pickup_location,
         ),
         "destination": ride_request.destination,
-        "requested_time": text[requested_time_keys[ride_request.requested_time]],
     }
     return render_template(
         "requests/sent.html", ride_request=ride_request, request_values=request_values

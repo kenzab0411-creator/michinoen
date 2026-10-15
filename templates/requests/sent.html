@@ -19,7 +19,6 @@
     {% if ride_request.destination_map_url %}
       <li><a href="{{ ride_request.destination_map_url }}" target="_blank" rel="noopener noreferrer">{{ t.open_map }}</a></li>
     {% endif %}
-    <li>{{ t.requested_time }}: {{ request_values.requested_time }}</li>
   </ul>
 
   <p><a href="{{ url_for('new_request') }}">{{ t.make_another_request }}</a></p>

@@ -54,13 +54,6 @@
     <label for="destination_map_url">{{ t.destination_map_url }}</label>
     <input id="destination_map_url" name="destination_map_url" type="url" placeholder="https://maps.google.com/..." maxlength="500">
 
-    <fieldset>
-      <legend>{{ t.requested_time }}</legend>
-      <label><input type="radio" name="requested_time" value="now" required> {{ t.now }}</label>
-      <label><input type="radio" name="requested_time" value="15_minutes"> {{ t.within_15_minutes }}</label>
-      <label><input type="radio" name="requested_time" value="30_minutes"> {{ t.within_30_minutes }}</label>
-    </fieldset>
-
     <button type="submit">{{ t.find_driver }}</button>
   </form>
 {% endblock %}

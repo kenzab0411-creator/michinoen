@@ -21,5 +21,6 @@ class RideRequest(BaseModel):
     pickup_map_url = CharField(max_length=500, null=True)
     destination = CharField(max_length=100)
     destination_map_url = CharField(max_length=500, null=True)
-    requested_time = CharField(max_length=20)
+    # 既存SQLiteとの互換性のために残す。新規リクエストでは使用しない。
+    requested_time = CharField(max_length=20, default="")
     status = CharField(default="pending")
