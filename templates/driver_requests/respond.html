@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t.respond_to_request }} | {{ t.app_name }}{% endblock %}
+
+{% block content %}
+  <h1>{{ t.respond_to_request }}</h1>
+
+  <ul>
+    <li>{{ t.people_count }}: {{ request_values.people_count }}（{{ request_values.age_group }}・{{ request_values.gender }}）</li>
+    <li>{{ t.pickup_location }}: {{ request_values.pickup_location }} → {{ request_values.destination }}</li>
+  </ul>
+
+  {% if error %}
+    <p class="error">{{ error }}</p>
+  {% endif %}
+
+  <form method="post">
+    <label for="driver_id">{{ t.respond_as }}</label>
+    <select id="driver_id" name="driver_id" required>
+      <option value="">{{ t.select_driver }}</option>
+      {% for driver in drivers %}
+        <option value="{{ driver.id }}">{{ driver.name }}（{{ driver.car_description }}）</option>
+      {% endfor %}
+    </select>
+
+    <fieldset>
+      <legend>{{ t.pickup_time }}</legend>
+      <label><input type="radio" name="pickup_minutes" value="5"> {{ t.in_5_minutes }}</label>
+      <label><input type="radio" name="pickup_minutes" value="10"> {{ t.in_10_minutes }}</label>
+      <label><input type="radio" name="pickup_minutes" value="15"> {{ t.in_15_minutes }}</label>
+    </fieldset>
+
+    <button type="submit" name="decision" value="accepted">{{ t.accept_request }}</button>
+    <button type="submit" name="decision" value="declined">{{ t.decline_request }}</button>
+  </form>
+{% endblock %}

@@ -1,4 +1,4 @@
-from peewee import CharField, Model
+from peewee import CharField, ForeignKeyField, Model
 
 from database import db
 
@@ -24,3 +24,5 @@ class RideRequest(BaseModel):
     # 既存SQLiteとの互換性のために残す。新規リクエストでは使用しない。
     requested_time = CharField(max_length=20, default="")
     status = CharField(default="pending")
+    driver = ForeignKeyField(Driver, null=True, backref="ride_requests")
+    pickup_minutes = CharField(max_length=10, null=True)

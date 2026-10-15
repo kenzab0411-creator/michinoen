@@ -25,6 +25,23 @@ TRANSLATIONS = {
         "registered_drivers": "登録済みドライバー",
         "no_drivers": "まだドライバーは登録されていません。",
         "register_driver": "ドライバーを登録する",
+        "driver_requests": "届いたリクエスト",
+        "no_pending_requests": "現在、対応待ちのリクエストはありません。",
+        "request_from": "リクエスト",
+        "respond_to_request": "リクエストに返答する",
+        "respond_as": "返答するドライバー",
+        "select_driver": "ドライバーを選択してください",
+        "pickup_time": "迎えに行ける時間",
+        "in_5_minutes": "5分後",
+        "in_10_minutes": "10分後",
+        "in_15_minutes": "15分後",
+        "accept_request": "乗せる",
+        "decline_request": "今回は見送る",
+        "response_error": "ドライバーを選択してください。承諾する場合は迎えの時間も選んでください。",
+        "response_saved": "返答を登録しました。",
+        "status_pending": "対応待ち",
+        "status_accepted": "承諾済み",
+        "status_declined": "見送り",
         "language": "言語",
         "request_ride": "ヒッチハイクをお願いする",
         "request_ride_intro": "移動したい内容を入力すると、地域のドライバーに届きます。",
@@ -71,6 +88,23 @@ TRANSLATIONS = {
         "registered_drivers": "Registered drivers",
         "no_drivers": "No drivers have registered yet.",
         "register_driver": "Register a driver",
+        "driver_requests": "Incoming requests",
+        "no_pending_requests": "There are no pending requests right now.",
+        "request_from": "Ride request",
+        "respond_to_request": "Respond to request",
+        "respond_as": "Responding driver",
+        "select_driver": "Select a driver",
+        "pickup_time": "Pickup time",
+        "in_5_minutes": "In 5 minutes",
+        "in_10_minutes": "In 10 minutes",
+        "in_15_minutes": "In 15 minutes",
+        "accept_request": "Accept",
+        "decline_request": "Decline",
+        "response_error": "Select a driver. When accepting, also select a pickup time.",
+        "response_saved": "Your response has been saved.",
+        "status_pending": "Pending",
+        "status_accepted": "Accepted",
+        "status_declined": "Declined",
         "language": "Language",
         "request_ride": "Request a ride",
         "request_ride_intro": "Enter your travel details to send a request to local drivers.",
@@ -127,6 +161,8 @@ def add_ride_request_columns():
     new_columns = {
         "pickup_map_url": "VARCHAR(500)",
         "destination_map_url": "VARCHAR(500)",
+        "driver_id": "INTEGER",
+        "pickup_minutes": "VARCHAR(10)",
     }
     for name, definition in new_columns.items():
         if name not in columns:
@@ -137,6 +173,26 @@ def is_valid_map_url(value):
     if not value:
         return True
     return urlparse(value).scheme in {"http", "https"}
+
+
+def localized_request_values(ride_request, text):
+    """DBの内部値を、現在選ばれている言語の表示用テキストに変換する。"""
+    people_count_keys = {"1": "one_person", "2": "two_people", "3+": "three_or_more"}
+    legacy_pickup_keys = {
+        "hiraizumi_station": "hiraizumi_station",
+        "chusonji": "chusonji",
+        "motsuji": "motsuji",
+    }
+    return {
+        "people_count": text[people_count_keys[ride_request.people_count]],
+        "gender": text[ride_request.gender],
+        "age_group": text[ride_request.age_group],
+        "pickup_location": text.get(
+            legacy_pickup_keys.get(ride_request.pickup_location, ""),
+            ride_request.pickup_location,
+        ),
+        "destination": ride_request.destination,
+    }
 
 
 @app.route("/")
@@ -196,24 +252,55 @@ def request_sent(request_id):
         return redirect(url_for("new_request"))
 
     text = TRANSLATIONS[session.get("locale", "ja")]
-    people_count_keys = {"1": "one_person", "2": "two_people", "3+": "three_or_more"}
-    legacy_pickup_keys = {
-        "hiraizumi_station": "hiraizumi_station",
-        "chusonji": "chusonji",
-        "motsuji": "motsuji",
-    }
-    request_values = {
-        "people_count": text[people_count_keys[ride_request.people_count]],
-        "gender": text[ride_request.gender],
-        "age_group": text[ride_request.age_group],
-        "pickup_location": text.get(
-            legacy_pickup_keys.get(ride_request.pickup_location, ""),
-            ride_request.pickup_location,
-        ),
-        "destination": ride_request.destination,
-    }
+    request_values = localized_request_values(ride_request, text)
     return render_template(
         "requests/sent.html", ride_request=ride_request, request_values=request_values
+    )
+
+
+@app.route("/driver/requests")
+def driver_requests():
+    pending_requests = RideRequest.select().where(RideRequest.status == "pending")
+    return render_template(
+        "driver_requests/index.html",
+        ride_requests=pending_requests,
+        drivers=Driver.select(),
+    )
+
+
+@app.route("/driver/requests/<int:request_id>/respond", methods=["GET", "POST"])
+def respond_to_request(request_id):
+    ride_request = RideRequest.get_or_none(
+        (RideRequest.id == request_id) & (RideRequest.status == "pending")
+    )
+    if ride_request is None:
+        return redirect(url_for("driver_requests"))
+
+    error = None
+    if request.method == "POST":
+        driver = Driver.get_or_none(Driver.id == request.form.get("driver_id"))
+        decision = request.form.get("decision")
+        pickup_minutes = request.form.get("pickup_minutes")
+        valid_pickup_minutes = {"5", "10", "15"}
+
+        if driver is None or decision not in {"accepted", "declined"}:
+            error = TRANSLATIONS[session.get("locale", "ja")]["response_error"]
+        elif decision == "accepted" and pickup_minutes not in valid_pickup_minutes:
+            error = TRANSLATIONS[session.get("locale", "ja")]["response_error"]
+        else:
+            ride_request.driver = driver
+            ride_request.status = decision
+            ride_request.pickup_minutes = pickup_minutes if decision == "accepted" else None
+            ride_request.save()
+            return redirect(url_for("driver_requests", saved="1"))
+
+    text = TRANSLATIONS[session.get("locale", "ja")]
+    return render_template(
+        "driver_requests/respond.html",
+        ride_request=ride_request,
+        request_values=localized_request_values(ride_request, text),
+        drivers=Driver.select(),
+        error=error,
     )
 
 

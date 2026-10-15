@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t.driver_requests }} | {{ t.app_name }}{% endblock %}
+
+{% block content %}
+  <h1>{{ t.driver_requests }}</h1>
+
+  {% if request.args.get('saved') %}
+    <p>{{ t.response_saved }}</p>
+  {% endif %}
+
+  {% if not drivers %}
+    <p><a href="{{ url_for('new_driver') }}">{{ t.register_driver }}</a></p>
+  {% elif ride_requests %}
+    <ul>
+      {% for ride_request in ride_requests %}
+        <li>
+          {{ t.request_from }} #{{ ride_request.id }}
+          — {{ ride_request.pickup_location }} → {{ ride_request.destination }}
+          <a href="{{ url_for('respond_to_request', request_id=ride_request.id) }}">{{ t.respond_to_request }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>{{ t.no_pending_requests }}</p>
+  {% endif %}
+{% endblock %}
