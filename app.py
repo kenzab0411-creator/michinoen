@@ -28,6 +28,7 @@ TRANSLATIONS = {
         "drivers": "ドライバー一覧",
         "driver_requests": "届いたリクエスト",
         "no_pending_requests": "現在、対応待ちのリクエストはありません。",
+        "no_requests": "まだリクエストは届いていません。",
         "request_from": "リクエスト",
         "respond_to_request": "リクエストに返答する",
         "pickup_time": "迎えに行ける時間",
@@ -41,6 +42,8 @@ TRANSLATIONS = {
         "status_pending": "対応待ち",
         "status_accepted": "承諾済み",
         "status_declined": "見送り",
+        "accepted_by": "{driver_name}さんが承諾しました",
+        "declined_by": "{driver_name}さんが見送りました",
         "language": "言語",
         "request_ride": "ヒッチハイクをお願いする",
         "request_ride_intro": "移動したい内容を入力すると、地域のドライバーに届きます。",
@@ -99,6 +102,7 @@ TRANSLATIONS = {
         "drivers": "Drivers",
         "driver_requests": "Incoming requests",
         "no_pending_requests": "There are no pending requests right now.",
+        "no_requests": "No ride requests have arrived yet.",
         "request_from": "Ride request",
         "respond_to_request": "Respond to request",
         "pickup_time": "Pickup time",
@@ -112,6 +116,8 @@ TRANSLATIONS = {
         "status_pending": "Pending",
         "status_accepted": "Accepted",
         "status_declined": "Declined",
+        "accepted_by": "Accepted by {driver_name}",
+        "declined_by": "Declined by {driver_name}",
         "language": "Language",
         "request_ride": "Request a ride",
         "request_ride_intro": "Enter your travel details to send a request to local drivers.",
@@ -314,10 +320,10 @@ def render_result_page(ride_request):
 
 @app.route("/driver/requests")
 def driver_requests():
-    pending_requests = RideRequest.select().where(RideRequest.status == "pending")
+    all_requests = RideRequest.select().order_by(RideRequest.id.desc())
     return render_template(
         "driver_requests/index.html",
-        ride_requests=pending_requests,
+        ride_requests=all_requests,
         drivers=Driver.select(),
     )
 

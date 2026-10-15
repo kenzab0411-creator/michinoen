@@ -17,11 +17,20 @@
         <li>
           {{ t.request_from }} #{{ ride_request.id }}
           — {{ ride_request.pickup_location }} → {{ ride_request.destination }}
-          <a href="{{ url_for('respond_to_request', request_id=ride_request.id) }}">{{ t.respond_to_request }}</a>
+          {% if ride_request.status == 'pending' %}
+            <strong>{{ t.status_pending }}</strong>
+            <a href="{{ url_for('respond_to_request', request_id=ride_request.id) }}">{{ t.respond_to_request }}</a>
+          {% elif ride_request.status == 'accepted' and ride_request.driver %}
+            <strong>{{ t.accepted_by.format(driver_name=ride_request.driver.name) }}</strong>
+          {% elif ride_request.status == 'declined' and ride_request.driver %}
+            <strong>{{ t.declined_by.format(driver_name=ride_request.driver.name) }}</strong>
+          {% else %}
+            <strong>{{ t.status_declined }}</strong>
+          {% endif %}
         </li>
       {% endfor %}
     </ul>
   {% else %}
-    <p>{{ t.no_pending_requests }}</p>
+    <p>{{ t.no_requests }}</p>
   {% endif %}
 {% endblock %}
