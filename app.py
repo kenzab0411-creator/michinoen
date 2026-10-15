@@ -14,6 +14,16 @@ app.config["SECRET_KEY"] = "change-this-before-production"
 TRANSLATIONS = {
     "ja": {
         "app_name": "道の縁",
+        "tagline": "旅人と地域の善意をつなぐ、平泉のヒッチハイク掲示板",
+        "home_intro": "移動に困っている旅行者と、手助けできる地域のドライバーをつなぎます。",
+        "traveler_button": "ヒッチハイクをお願いする",
+        "driver_button": "施し主（ドライバー）として参加する",
+        "how_to_use": "使い方",
+        "how_to_use_text": "旅行者は希望を送信し、ドライバーは届いたリクエストから返答します。",
+        "safety_notes": "利用時の注意",
+        "safety_note_1": "乗車・送迎は、双方が内容を確認し、納得した場合だけ行ってください。",
+        "safety_note_2": "待ち合わせは人目のある安全な場所を選びましょう。",
+        "safety_note_3": "緊急時はこのアプリを使わず、警察・救急などへ連絡してください。",
         "driver_registration": "ドライバー登録",
         "driver_registration_intro": "旅行者を乗せられる地域の方の情報を登録します。",
         "name": "お名前",
@@ -89,6 +99,16 @@ TRANSLATIONS = {
     },
     "en": {
         "app_name": "Michi no En",
+        "tagline": "A Hiraizumi ride board connecting travelers and local goodwill",
+        "home_intro": "We connect travelers who need a ride with local drivers who can help.",
+        "traveler_button": "Request a hitchhike",
+        "driver_button": "Join as a driver",
+        "how_to_use": "How it works",
+        "how_to_use_text": "Travelers send a request. Drivers reply from their incoming requests.",
+        "safety_notes": "Safety notes",
+        "safety_note_1": "Only travel together after both people have checked the details and agreed.",
+        "safety_note_2": "Choose a public, safe place to meet.",
+        "safety_note_3": "For emergencies, contact the police or emergency services instead of using this app.",
         "driver_registration": "Driver registration",
         "driver_registration_intro": "Register your information as a local driver who can help travelers.",
         "name": "Your name",
@@ -237,7 +257,14 @@ def localized_request_values(ride_request, text):
 
 @app.route("/")
 def index():
-    return redirect(url_for("new_request"))
+    return render_template("home.html")
+
+
+@app.route("/driver")
+def driver_portal():
+    if Driver.select().exists():
+        return redirect(url_for("driver_requests"))
+    return redirect(url_for("new_driver"))
 
 
 @app.route("/language/<locale>")

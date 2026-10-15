@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t.app_name }}{% endblock %}
+
+{% block content %}
+  <main class="home">
+    <h1>{{ t.app_name }}</h1>
+    <p class="tagline">{{ t.tagline }}</p>
+    <p>{{ t.home_intro }}</p>
+
+    <div class="actions">
+      <a class="button-link" href="{{ url_for('new_request') }}">{{ t.traveler_button }}</a>
+      <a class="button-link secondary" href="{{ url_for('driver_portal') }}">{{ t.driver_button }}</a>
+    </div>
+
+    <section>
+      <h2>{{ t.how_to_use }}</h2>
+      <p>{{ t.how_to_use_text }}</p>
+    </section>
+
+    <section class="notes">
+      <h2>{{ t.safety_notes }}</h2>
+      <ul>
+        <li>{{ t.safety_note_1 }}</li>
+        <li>{{ t.safety_note_2 }}</li>
+        <li>{{ t.safety_note_3 }}</li>
+      </ul>
+    </section>
+  </main>
+{% endblock %}
