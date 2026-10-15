@@ -29,15 +29,13 @@ TRANSLATIONS = {
         "no_pending_requests": "現在、対応待ちのリクエストはありません。",
         "request_from": "リクエスト",
         "respond_to_request": "リクエストに返答する",
-        "respond_as": "返答するドライバー",
-        "select_driver": "ドライバーを選択してください",
         "pickup_time": "迎えに行ける時間",
-        "in_5_minutes": "5分後",
-        "in_10_minutes": "10分後",
         "in_15_minutes": "15分後",
+        "in_30_minutes": "30分後",
+        "in_60_minutes": "60分後",
         "accept_request": "乗せる",
         "decline_request": "今回は見送る",
-        "response_error": "ドライバーを選択してください。承諾する場合は迎えの時間も選んでください。",
+        "response_error": "承諾する場合は迎えの時間を選んでください。",
         "response_saved": "返答を登録しました。",
         "status_pending": "対応待ち",
         "status_accepted": "承諾済み",
@@ -92,15 +90,13 @@ TRANSLATIONS = {
         "no_pending_requests": "There are no pending requests right now.",
         "request_from": "Ride request",
         "respond_to_request": "Respond to request",
-        "respond_as": "Responding driver",
-        "select_driver": "Select a driver",
         "pickup_time": "Pickup time",
-        "in_5_minutes": "In 5 minutes",
-        "in_10_minutes": "In 10 minutes",
         "in_15_minutes": "In 15 minutes",
+        "in_30_minutes": "In 30 minutes",
+        "in_60_minutes": "In 60 minutes",
         "accept_request": "Accept",
         "decline_request": "Decline",
-        "response_error": "Select a driver. When accepting, also select a pickup time.",
+        "response_error": "When accepting, select a pickup time.",
         "response_saved": "Your response has been saved.",
         "status_pending": "Pending",
         "status_accepted": "Accepted",
@@ -276,19 +272,22 @@ def respond_to_request(request_id):
     if ride_request is None:
         return redirect(url_for("driver_requests"))
 
+    current_driver = Driver.select().order_by(Driver.id.desc()).first()
+    if current_driver is None:
+        return redirect(url_for("new_driver"))
+
     error = None
     if request.method == "POST":
-        driver = Driver.get_or_none(Driver.id == request.form.get("driver_id"))
         decision = request.form.get("decision")
         pickup_minutes = request.form.get("pickup_minutes")
-        valid_pickup_minutes = {"5", "10", "15"}
+        valid_pickup_minutes = {"15", "30", "60"}
 
-        if driver is None or decision not in {"accepted", "declined"}:
+        if decision not in {"accepted", "declined"}:
             error = TRANSLATIONS[session.get("locale", "ja")]["response_error"]
         elif decision == "accepted" and pickup_minutes not in valid_pickup_minutes:
             error = TRANSLATIONS[session.get("locale", "ja")]["response_error"]
         else:
-            ride_request.driver = driver
+            ride_request.driver = current_driver
             ride_request.status = decision
             ride_request.pickup_minutes = pickup_minutes if decision == "accepted" else None
             ride_request.save()
@@ -299,7 +298,6 @@ def respond_to_request(request_id):
         "driver_requests/respond.html",
         ride_request=ride_request,
         request_values=localized_request_values(ride_request, text),
-        drivers=Driver.select(),
         error=error,
     )
 

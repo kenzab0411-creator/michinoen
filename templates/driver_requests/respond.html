@@ -15,19 +15,11 @@
   {% endif %}
 
   <form method="post">
-    <label for="driver_id">{{ t.respond_as }}</label>
-    <select id="driver_id" name="driver_id" required>
-      <option value="">{{ t.select_driver }}</option>
-      {% for driver in drivers %}
-        <option value="{{ driver.id }}">{{ driver.name }}（{{ driver.car_description }}）</option>
-      {% endfor %}
-    </select>
-
     <fieldset>
       <legend>{{ t.pickup_time }}</legend>
-      <label><input type="radio" name="pickup_minutes" value="5"> {{ t.in_5_minutes }}</label>
-      <label><input type="radio" name="pickup_minutes" value="10"> {{ t.in_10_minutes }}</label>
       <label><input type="radio" name="pickup_minutes" value="15"> {{ t.in_15_minutes }}</label>
+      <label><input type="radio" name="pickup_minutes" value="30"> {{ t.in_30_minutes }}</label>
+      <label><input type="radio" name="pickup_minutes" value="60"> {{ t.in_60_minutes }}</label>
     </fieldset>
 
     <button type="submit" name="decision" value="accepted">{{ t.accept_request }}</button>
