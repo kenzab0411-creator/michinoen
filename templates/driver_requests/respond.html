@@ -8,6 +8,9 @@
   <ul>
     <li>{{ t.people_count }}: {{ request_values.people_count }}（{{ request_values.age_group }}・{{ request_values.gender }}）</li>
     <li>{{ t.pickup_location }}: {{ request_values.pickup_location }} → {{ request_values.destination }}</li>
+    {% if ride_request.pickup_map_url %}
+      <li><a href="{{ ride_request.pickup_map_url }}" target="_blank" rel="noopener noreferrer">{{ t.pickup_location }}: {{ t.open_map }}</a></li>
+    {% endif %}
     {% if ride_request.destination_map_url %}
       <li><a href="{{ ride_request.destination_map_url }}" target="_blank" rel="noopener noreferrer">{{ t.destination }}: {{ t.open_map }}</a></li>
     {% endif %}
