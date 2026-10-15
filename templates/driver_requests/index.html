@@ -19,6 +19,9 @@
         <li>
           {{ t.request_from }} #{{ ride_request.id }}
           — {{ ride_request.pickup_location }} → {{ ride_request.destination }}
+          {% if ride_request.destination_map_url %}
+            <a href="{{ ride_request.destination_map_url }}" target="_blank" rel="noopener noreferrer">{{ t.destination }}: {{ t.open_map }}</a>
+          {% endif %}
           {% if ride_request.status == 'pending' %}
             <strong>{{ t.status_pending }}</strong>
             <a href="{{ url_for('respond_to_request', request_id=ride_request.id) }}">{{ t.respond_to_request }}</a>
