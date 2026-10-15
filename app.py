@@ -14,8 +14,8 @@ app.config["SECRET_KEY"] = "change-this-before-production"
 TRANSLATIONS = {
     "ja": {
         "app_name": "道の縁",
-        "tagline": "旅人と地域の善意をつなぐ、平泉のヒッチハイク掲示板",
-        "home_intro": "移動に困っている旅行者と、手助けできる地域のドライバーをつなぎます。",
+        "tagline": "旅人と、地域の善意をつなぎ、平泉のヒッチハイクアプリ",
+        "home_intro": "移動に困っている人と、手助けできる通りすがりのドライバーをつなぎます。",
         "traveler_button": "ヒッチハイクをお願いする",
         "driver_button": "施し主（ドライバー）として参加する",
         "how_to_use": "使い方",
