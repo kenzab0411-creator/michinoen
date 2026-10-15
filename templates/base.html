@@ -19,7 +19,9 @@
   </head>
   <body>
     <header>
-      <a href="{{ url_for('new_driver') }}">{{ t.app_name }}</a>
+      <a href="{{ url_for('new_request') }}">{{ t.app_name }}</a>
+      <a href="{{ url_for('new_request') }}">{{ t.request_ride }}</a>
+      <a href="{{ url_for('new_driver') }}">{{ t.register_driver }}</a>
       <a href="{{ url_for('driver_requests') }}">{{ t.driver_requests }}</a>
       <nav aria-label="{{ t.language }}">
         <a href="{{ url_for('set_language', locale='ja') }}" {% if locale == 'ja' %}aria-current="page"{% endif %}>日本語</a>
