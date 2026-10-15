@@ -29,7 +29,6 @@
     <header>
       <a href="{{ url_for('index') }}">{{ t.app_name }}</a>
       <a href="{{ url_for('new_request') }}">{{ t.request_ride }}</a>
-      <a href="{{ url_for('new_driver') }}">{{ t.register_driver }}</a>
       <a href="{{ url_for('driver_requests') }}">
         {{ t.driver_requests }}
         {% if pending_request_count %}<span class="badge">{{ pending_request_count }}</span>{% endif %}

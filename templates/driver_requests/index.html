@@ -13,9 +13,7 @@
     <p>{{ t.response_saved }}</p>
   {% endif %}
 
-  {% if not drivers %}
-    <p><a href="{{ url_for('new_driver') }}">{{ t.register_driver }}</a></p>
-  {% elif ride_requests %}
+  {% if ride_requests %}
     <ul>
       {% for ride_request in ride_requests %}
         <li>
@@ -24,10 +22,10 @@
           {% if ride_request.status == 'pending' %}
             <strong>{{ t.status_pending }}</strong>
             <a href="{{ url_for('respond_to_request', request_id=ride_request.id) }}">{{ t.respond_to_request }}</a>
-          {% elif ride_request.status == 'accepted' and ride_request.driver %}
-            <strong>{{ t.accepted_by.format(driver_name=ride_request.driver.name) }}</strong>
-          {% elif ride_request.status == 'declined' and ride_request.driver %}
-            <strong>{{ t.declined_by.format(driver_name=ride_request.driver.name) }}</strong>
+          {% elif ride_request.status == 'accepted' and ride_request.driver_name %}
+            <strong>{{ t.accepted_by.format(driver_name=ride_request.driver_name) }}</strong>
+          {% elif ride_request.status == 'declined' and ride_request.driver_name %}
+            <strong>{{ t.declined_by.format(driver_name=ride_request.driver_name) }}</strong>
           {% else %}
             <strong>{{ t.status_declined }}</strong>
           {% endif %}

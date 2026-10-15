@@ -15,8 +15,8 @@
     <p>{{ t.waiting_for_response }}</p>
     <p><a href="{{ url_for('request_result', request_id=ride_request.id) }}">{{ t.refresh }}</a></p>
   {% elif ride_request.status == 'accepted' %}
-    <p>{{ t.accepted_response.format(driver_name=ride_request.driver.name, minutes=ride_request.pickup_minutes) }}</p>
-    <p>{{ t.car_description }}: {{ ride_request.driver.car_description }}</p>
+    <p>{{ t.accepted_response.format(driver_name=ride_request.driver_name, minutes=ride_request.pickup_minutes) }}</p>
+    <p>{{ t.car_description }}: {{ ride_request.driver_car_description }}</p>
     <p><strong>{{ t.meeting_code }}: {{ ride_request.meeting_code }}</strong></p>
   {% else %}
     <p>{{ t.declined_response }}</p>

@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from flask import Flask, redirect, render_template, request, session, url_for
 
 from database import DATABASE_PATH, db
-from models import Driver, RideRequest
+from models import RideRequest
 
 
 app = Flask(__name__)
@@ -24,31 +24,23 @@ TRANSLATIONS = {
         "safety_note_1": "乗車・送迎は、双方が内容を確認し、納得した場合だけ行ってください。",
         "safety_note_2": "待ち合わせは人目のある安全な場所を選びましょう。",
         "safety_note_3": "緊急時はこのアプリを使わず、警察・救急などへ連絡してください。",
-        "driver_registration": "ドライバー登録",
-        "driver_registration_intro": "旅行者を乗せられる地域の方の情報を登録します。",
-        "name": "お名前",
-        "name_example": "例: ダリア",
         "car_description": "車の特徴・色",
         "car_example": "例: 白い軽自動車",
-        "register": "登録する",
-        "required_error": "お名前と車の特徴・色を入力してください。",
-        "registered_drivers": "登録済みドライバー",
-        "no_drivers": "まだドライバーは登録されていません。",
-        "register_driver": "ドライバーを登録する",
-        "drivers": "ドライバー一覧",
         "driver_requests": "届いたリクエスト",
         "new_requests_banner": "新しい対応待ちリクエストが {count} 件あります。",
         "no_pending_requests": "現在、対応待ちのリクエストはありません。",
         "no_requests": "まだリクエストは届いていません。",
         "request_from": "リクエスト",
         "respond_to_request": "リクエストに返答する",
+        "nickname": "ニックネーム",
+        "nickname_example": "例: ダリア",
         "pickup_time": "迎えに行ける時間",
         "in_15_minutes": "15分後",
         "in_30_minutes": "30分後",
         "in_60_minutes": "60分後",
         "accept_request": "乗せる",
         "decline_request": "今回は見送る",
-        "response_error": "承諾する場合は迎えの時間を選んでください。",
+        "response_error": "承諾する場合は、ニックネーム、車の特徴、迎えの時間を入力してください。",
         "response_saved": "返答を登録しました。",
         "status_pending": "対応待ち",
         "status_accepted": "承諾済み",
@@ -109,31 +101,23 @@ TRANSLATIONS = {
         "safety_note_1": "Only travel together after both people have checked the details and agreed.",
         "safety_note_2": "Choose a public, safe place to meet.",
         "safety_note_3": "For emergencies, contact the police or emergency services instead of using this app.",
-        "driver_registration": "Driver registration",
-        "driver_registration_intro": "Register your information as a local driver who can help travelers.",
-        "name": "Your name",
-        "name_example": "e.g. Daria",
         "car_description": "Car description / color",
         "car_example": "e.g. White compact car",
-        "register": "Register",
-        "required_error": "Please enter your name and a description of your car.",
-        "registered_drivers": "Registered drivers",
-        "no_drivers": "No drivers have registered yet.",
-        "register_driver": "Register a driver",
-        "drivers": "Drivers",
         "driver_requests": "Incoming requests",
         "new_requests_banner": "You have {count} new pending ride request(s).",
         "no_pending_requests": "There are no pending requests right now.",
         "no_requests": "No ride requests have arrived yet.",
         "request_from": "Ride request",
         "respond_to_request": "Respond to request",
+        "nickname": "Nickname",
+        "nickname_example": "e.g. Daria",
         "pickup_time": "Pickup time",
         "in_15_minutes": "In 15 minutes",
         "in_30_minutes": "In 30 minutes",
         "in_60_minutes": "In 60 minutes",
         "accept_request": "Accept",
         "decline_request": "Decline",
-        "response_error": "When accepting, select a pickup time.",
+        "response_error": "When accepting, enter a nickname, car description, and pickup time.",
         "response_saved": "Your response has been saved.",
         "status_pending": "Pending",
         "status_accepted": "Accepted",
@@ -200,7 +184,7 @@ def initialize_database():
     """SQLiteファイルと必要なテーブルを用意する。"""
     DATABASE_PATH.parent.mkdir(exist_ok=True)
     db.connect(reuse_if_open=True)
-    db.create_tables([Driver, RideRequest])
+    db.create_tables([RideRequest])
     add_ride_request_columns()
 
 
@@ -210,7 +194,8 @@ def add_ride_request_columns():
     new_columns = {
         "pickup_map_url": "VARCHAR(500)",
         "destination_map_url": "VARCHAR(500)",
-        "driver_id": "INTEGER",
+        "driver_name": "VARCHAR(50)",
+        "driver_car_description": "VARCHAR(100)",
         "pickup_minutes": "VARCHAR(10)",
         "meeting_code": "VARCHAR(2)",
         "access_token": "VARCHAR(64)",
@@ -222,6 +207,18 @@ def add_ride_request_columns():
         "CREATE UNIQUE INDEX IF NOT EXISTS riderequest_access_token "
         "ON riderequest (access_token) WHERE access_token IS NOT NULL"
     )
+    if "driver" in db.get_tables() and "driver_id" in columns:
+        db.execute_sql(
+            """
+            UPDATE riderequest
+            SET
+                driver_name = (SELECT name FROM driver WHERE driver.id = riderequest.driver_id),
+                driver_car_description = (
+                    SELECT car_description FROM driver WHERE driver.id = riderequest.driver_id
+                )
+            WHERE driver_id IS NOT NULL AND driver_name IS NULL
+            """
+        )
 
 
 def is_valid_map_url(value):
@@ -262,9 +259,7 @@ def index():
 
 @app.route("/driver")
 def driver_portal():
-    if Driver.select().exists():
-        return redirect(url_for("driver_requests"))
-    return redirect(url_for("new_driver"))
+    return redirect(url_for("driver_requests"))
 
 
 @app.route("/language/<locale>")
@@ -358,7 +353,6 @@ def driver_requests():
     return render_template(
         "driver_requests/index.html",
         ride_requests=all_requests,
-        drivers=Driver.select(),
     )
 
 
@@ -370,23 +364,28 @@ def respond_to_request(request_id):
     if ride_request is None:
         return redirect(url_for("driver_requests"))
 
-    current_driver = Driver.select().order_by(Driver.id.desc()).first()
-    if current_driver is None:
-        return redirect(url_for("new_driver"))
-
     error = None
     if request.method == "POST":
         decision = request.form.get("decision")
         pickup_minutes = request.form.get("pickup_minutes")
+        driver_name = request.form.get("driver_name", "").strip()
+        driver_car_description = request.form.get("driver_car_description", "").strip()
         valid_pickup_minutes = {"15", "30", "60"}
 
         if decision not in {"accepted", "declined"}:
             error = TRANSLATIONS[session.get("locale", "ja")]["response_error"]
-        elif decision == "accepted" and pickup_minutes not in valid_pickup_minutes:
+        elif decision == "accepted" and (
+            pickup_minutes not in valid_pickup_minutes
+            or not driver_name
+            or not driver_car_description
+        ):
             error = TRANSLATIONS[session.get("locale", "ja")]["response_error"]
         else:
-            ride_request.driver = current_driver
             ride_request.status = decision
+            ride_request.driver_name = driver_name if decision == "accepted" else None
+            ride_request.driver_car_description = (
+                driver_car_description if decision == "accepted" else None
+            )
             ride_request.pickup_minutes = pickup_minutes if decision == "accepted" else None
             ride_request.meeting_code = (
                 f"{secrets.randbelow(100):02d}" if decision == "accepted" else None
@@ -401,28 +400,6 @@ def respond_to_request(request_id):
         request_values=localized_request_values(ride_request, text),
         error=error,
     )
-
-
-@app.route("/drivers/new", methods=["GET", "POST"])
-def new_driver():
-    error = None
-
-    if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        car_description = request.form.get("car_description", "").strip()
-
-        if not name or not car_description:
-            error = TRANSLATIONS[session.get("locale", "ja")]["required_error"]
-        else:
-            Driver.create(name=name, car_description=car_description)
-            return redirect(url_for("drivers"))
-
-    return render_template("drivers/new.html", error=error)
-
-
-@app.route("/drivers")
-def drivers():
-    return render_template("drivers/index.html", drivers=Driver.select())
 
 
 if __name__ == "__main__":

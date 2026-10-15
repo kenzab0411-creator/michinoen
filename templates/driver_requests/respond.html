@@ -15,6 +15,12 @@
   {% endif %}
 
   <form method="post">
+    <label for="driver_name">{{ t.nickname }}</label>
+    <input id="driver_name" name="driver_name" value="{{ request.form.get('driver_name', '') }}" placeholder="{{ t.nickname_example }}" maxlength="50">
+
+    <label for="driver_car_description">{{ t.car_description }}</label>
+    <input id="driver_car_description" name="driver_car_description" value="{{ request.form.get('driver_car_description', '') }}" placeholder="{{ t.car_example }}" maxlength="100">
+
     <fieldset>
       <legend>{{ t.pickup_time }}</legend>
       <label><input type="radio" name="pickup_minutes" value="15"> {{ t.in_15_minutes }}</label>

@@ -1,4 +1,4 @@
-from peewee import CharField, ForeignKeyField, Model
+from peewee import CharField, Model
 
 from database import db
 
@@ -6,11 +6,6 @@ from database import db
 class BaseModel(Model):
     class Meta:
         database = db
-
-
-class Driver(BaseModel):
-    name = CharField(max_length=50)
-    car_description = CharField(max_length=100)
 
 
 class RideRequest(BaseModel):
@@ -24,7 +19,8 @@ class RideRequest(BaseModel):
     # 既存SQLiteとの互換性のために残す。新規リクエストでは使用しない。
     requested_time = CharField(max_length=20, default="")
     status = CharField(default="pending")
-    driver = ForeignKeyField(Driver, null=True, backref="ride_requests")
+    driver_name = CharField(max_length=50, null=True)
+    driver_car_description = CharField(max_length=100, null=True)
     pickup_minutes = CharField(max_length=10, null=True)
     meeting_code = CharField(max_length=2, null=True)
     access_token = CharField(max_length=64, null=True)
