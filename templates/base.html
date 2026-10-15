@@ -15,6 +15,8 @@
       fieldset { margin-top: 16px; }
       fieldset label { font-weight: normal; }
       fieldset input { display: inline; width: auto; }
+      .badge { display: inline-block; min-width: 1.3em; padding: 0 0.25em; border-radius: 1em; background: #c62828; color: white; font-size: 0.85em; text-align: center; }
+      .notice { padding: 12px; border: 2px solid #c62828; background: #fff3f3; font-weight: bold; }
     </style>
   </head>
   <body>
@@ -22,7 +24,10 @@
       <a href="{{ url_for('new_request') }}">{{ t.app_name }}</a>
       <a href="{{ url_for('new_request') }}">{{ t.request_ride }}</a>
       <a href="{{ url_for('new_driver') }}">{{ t.register_driver }}</a>
-      <a href="{{ url_for('driver_requests') }}">{{ t.driver_requests }}</a>
+      <a href="{{ url_for('driver_requests') }}">
+        {{ t.driver_requests }}
+        {% if pending_request_count %}<span class="badge">{{ pending_request_count }}</span>{% endif %}
+      </a>
       <nav aria-label="{{ t.language }}">
         <a href="{{ url_for('set_language', locale='ja') }}" {% if locale == 'ja' %}aria-current="page"{% endif %}>日本語</a>
         <a href="{{ url_for('set_language', locale='en') }}" {% if locale == 'en' %}aria-current="page"{% endif %}>English</a>

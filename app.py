@@ -27,6 +27,7 @@ TRANSLATIONS = {
         "register_driver": "ドライバーを登録する",
         "drivers": "ドライバー一覧",
         "driver_requests": "届いたリクエスト",
+        "new_requests_banner": "新しい対応待ちリクエストが {count} 件あります。",
         "no_pending_requests": "現在、対応待ちのリクエストはありません。",
         "no_requests": "まだリクエストは届いていません。",
         "request_from": "リクエスト",
@@ -101,6 +102,7 @@ TRANSLATIONS = {
         "register_driver": "Register a driver",
         "drivers": "Drivers",
         "driver_requests": "Incoming requests",
+        "new_requests_banner": "You have {count} new pending ride request(s).",
         "no_pending_requests": "There are no pending requests right now.",
         "no_requests": "No ride requests have arrived yet.",
         "request_from": "Ride request",
@@ -166,7 +168,12 @@ TRANSLATIONS = {
 @app.context_processor
 def inject_language():
     locale = session.get("locale", "ja")
-    return {"locale": locale, "t": TRANSLATIONS[locale]}
+    pending_request_count = RideRequest.select().where(RideRequest.status == "pending").count()
+    return {
+        "locale": locale,
+        "t": TRANSLATIONS[locale],
+        "pending_request_count": pending_request_count,
+    }
 
 
 def initialize_database():

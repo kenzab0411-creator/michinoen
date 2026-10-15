@@ -5,6 +5,10 @@
 {% block content %}
   <h1>{{ t.driver_requests }}</h1>
 
+  {% if pending_request_count %}
+    <p class="notice">{{ t.new_requests_banner.format(count=pending_request_count) }}</p>
+  {% endif %}
+
   {% if request.args.get('saved') %}
     <p>{{ t.response_saved }}</p>
   {% endif %}
