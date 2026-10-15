@@ -1,4 +1,5 @@
 from pathlib import Path
+import secrets
 from urllib.parse import urlparse
 
 from flask import Flask, redirect, render_template, request, session, url_for
@@ -72,6 +73,13 @@ TRANSLATIONS = {
         "request_error": "すべての項目を入力・選択してください。",
         "map_url_error": "地図リンクには http:// または https:// から始まるURLを入力してください。",
         "make_another_request": "別のリクエストを送る",
+        "driver_response": "ドライバーからの返事",
+        "waiting_for_response": "ドライバーからの返事を待っています。",
+        "refresh": "画面を更新する",
+        "accepted_response": "{driver_name}さんが {minutes}分後 に迎えに行きます！",
+        "declined_response": "今回は乗せられるドライバーが見つかりませんでした。",
+        "car_description": "車の特徴",
+        "meeting_code": "合言葉",
     },
     "en": {
         "app_name": "Michi no En",
@@ -133,6 +141,13 @@ TRANSLATIONS = {
         "request_error": "Please complete all fields.",
         "map_url_error": "Map links must start with http:// or https://.",
         "make_another_request": "Send another request",
+        "driver_response": "Driver response",
+        "waiting_for_response": "Waiting for a driver's response.",
+        "refresh": "Refresh",
+        "accepted_response": "{driver_name} will pick you up in {minutes} minutes!",
+        "declined_response": "No driver is available for this ride right now.",
+        "car_description": "Car description",
+        "meeting_code": "Meeting code",
     },
 }
 
@@ -159,6 +174,7 @@ def add_ride_request_columns():
         "destination_map_url": "VARCHAR(500)",
         "driver_id": "INTEGER",
         "pickup_minutes": "VARCHAR(10)",
+        "meeting_code": "VARCHAR(2)",
     }
     for name, definition in new_columns.items():
         if name not in columns:
@@ -236,7 +252,7 @@ def new_request():
             error = text["map_url_error"]
         else:
             ride_request = RideRequest.create(**fields)
-            return redirect(url_for("request_sent", request_id=ride_request.id))
+            return redirect(url_for("request_result", request_id=ride_request.id))
 
     return render_template("requests/new.html", error=error)
 
@@ -252,6 +268,14 @@ def request_sent(request_id):
     return render_template(
         "requests/sent.html", ride_request=ride_request, request_values=request_values
     )
+
+
+@app.route("/requests/<int:request_id>/result")
+def request_result(request_id):
+    ride_request = RideRequest.get_or_none(RideRequest.id == request_id)
+    if ride_request is None:
+        return redirect(url_for("new_request"))
+    return render_template("requests/result.html", ride_request=ride_request)
 
 
 @app.route("/driver/requests")
@@ -290,6 +314,9 @@ def respond_to_request(request_id):
             ride_request.driver = current_driver
             ride_request.status = decision
             ride_request.pickup_minutes = pickup_minutes if decision == "accepted" else None
+            ride_request.meeting_code = (
+                f"{secrets.randbelow(100):02d}" if decision == "accepted" else None
+            )
             ride_request.save()
             return redirect(url_for("driver_requests", saved="1"))
 

@@ -26,3 +26,4 @@ class RideRequest(BaseModel):
     status = CharField(default="pending")
     driver = ForeignKeyField(Driver, null=True, backref="ride_requests")
     pickup_minutes = CharField(max_length=10, null=True)
+    meeting_code = CharField(max_length=2, null=True)
