@@ -3,14 +3,16 @@
 {% block title %}{{ t.request_ride }} | {{ t.app_name }}{% endblock %}
 
 {% block content %}
-  <h1>{{ t.request_ride }}</h1>
-  <p>{{ t.request_ride_intro }}</p>
+  <div class="page-heading">
+    <h1>{{ t.request_ride }}</h1>
+    <p>{{ t.request_ride_intro }}</p>
+  </div>
 
   {% if error %}
     <p class="error">{{ error }}</p>
   {% endif %}
 
-  <form method="post">
+  <form class="form-card" method="post">
     <label for="people_count">{{ t.people_count }}</label>
     <select id="people_count" name="people_count" required>
       <option value="">--</option>

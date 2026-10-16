@@ -3,7 +3,9 @@
 {% block title %}{{ t.driver_requests }} | {{ t.app_name }}{% endblock %}
 
 {% block content %}
-  <h1>{{ t.driver_requests }}</h1>
+  <div class="page-heading">
+    <h1>{{ t.driver_requests }}</h1>
+  </div>
 
   {% if pending_request_count %}
     <p class="notice">{{ t.new_requests_banner.format(count=pending_request_count) }}</p>
@@ -14,27 +16,31 @@
   {% endif %}
 
   {% if ride_requests %}
-    <ul>
+    <ul class="request-list">
       {% for ride_request in ride_requests %}
-        <li>
-          {{ t.request_from }} #{{ ride_request.id }}
-          — {{ ride_request.pickup_location }} → {{ ride_request.destination }}
-          {% if ride_request.pickup_map_url %}
-            <a href="{{ ride_request.pickup_map_url }}" target="_blank" rel="noopener noreferrer">{{ t.pickup_location }}: {{ t.open_map }}</a>
-          {% endif %}
-          {% if ride_request.destination_map_url %}
-            <a href="{{ ride_request.destination_map_url }}" target="_blank" rel="noopener noreferrer">{{ t.destination }}: {{ t.open_map }}</a>
-          {% endif %}
+        <li class="request-card">
+          <div class="request-meta">{{ t.request_from }} #{{ ride_request.id }}</div>
+          <div class="request-route">{{ ride_request.pickup_location }} <span>→</span> {{ ride_request.destination }}</div>
+          <div class="map-links">
+            {% if ride_request.pickup_map_url %}
+              <a href="{{ ride_request.pickup_map_url }}" target="_blank" rel="noopener noreferrer">{{ t.pickup_location }}: {{ t.open_map }}</a>
+            {% endif %}
+            {% if ride_request.destination_map_url %}
+              <a href="{{ ride_request.destination_map_url }}" target="_blank" rel="noopener noreferrer">{{ t.destination }}: {{ t.open_map }}</a>
+            {% endif %}
+          </div>
+          <div class="request-action">
           {% if ride_request.status == 'pending' %}
-            <strong>{{ t.status_pending }}</strong>
+            <strong class="status pending">{{ t.status_pending }}</strong>
             <a href="{{ url_for('respond_to_request', request_id=ride_request.id) }}">{{ t.respond_to_request }}</a>
           {% elif ride_request.status == 'accepted' and ride_request.driver_name %}
-            <strong>{{ t.accepted_by.format(driver_name=ride_request.driver_name) }}</strong>
+            <strong class="status">{{ t.accepted_by.format(driver_name=ride_request.driver_name) }}</strong>
           {% elif ride_request.status == 'declined' and ride_request.driver_name %}
-            <strong>{{ t.declined_by.format(driver_name=ride_request.driver_name) }}</strong>
+            <strong class="status">{{ t.declined_by.format(driver_name=ride_request.driver_name) }}</strong>
           {% else %}
-            <strong>{{ t.status_declined }}</strong>
+            <strong class="status">{{ t.status_declined }}</strong>
           {% endif %}
+          </div>
         </li>
       {% endfor %}
     </ul>

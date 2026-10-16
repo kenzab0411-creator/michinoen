@@ -3,8 +3,11 @@
 {% block title %}{{ t.respond_to_request }} | {{ t.app_name }}{% endblock %}
 
 {% block content %}
-  <h1>{{ t.respond_to_request }}</h1>
+  <div class="page-heading">
+    <h1>{{ t.respond_to_request }}</h1>
+  </div>
 
+  <section class="request-summary">
   <ul>
     <li>{{ t.people_count }}: {{ request_values.people_count }}（{{ request_values.age_group }}・{{ request_values.gender }}）</li>
     <li>{{ t.pickup_location }}: {{ request_values.pickup_location }} → {{ request_values.destination }}</li>
@@ -15,12 +18,13 @@
       <li><a href="{{ ride_request.destination_map_url }}" target="_blank" rel="noopener noreferrer">{{ t.destination }}: {{ t.open_map }}</a></li>
     {% endif %}
   </ul>
+  </section>
 
   {% if error %}
     <p class="error">{{ error }}</p>
   {% endif %}
 
-  <form method="post">
+  <form class="form-card" method="post">
     <label for="driver_name">{{ t.nickname }}</label>
     <input id="driver_name" name="driver_name" value="{{ request.form.get('driver_name', '') }}" placeholder="{{ t.nickname_example }}" maxlength="50">
 

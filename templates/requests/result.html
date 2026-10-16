@@ -3,23 +3,34 @@
 {% block title %}{{ t.driver_response }} | {{ t.app_name }}{% endblock %}
 
 {% block content %}
-  <h1>{{ t.driver_response }}</h1>
+  <div class="page-heading">
+    <h1>{{ t.driver_response }}</h1>
+  </div>
 
   {% if result_url %}
-    <h2>{{ t.save_result_url }}</h2>
-    <p>{{ t.save_result_url_intro }}</p>
-    <p><a href="{{ result_url }}">{{ result_url }}</a></p>
+    <section class="content-card">
+      <h2>{{ t.save_result_url }}</h2>
+      <p>{{ t.save_result_url_intro }}</p>
+      <p class="result-url"><a href="{{ result_url }}">{{ result_url }}</a></p>
+    </section>
   {% endif %}
 
   {% if ride_request.status == 'pending' %}
-    <p>{{ t.waiting_for_response }}</p>
-    <p><a href="{{ url_for('request_result', request_id=ride_request.id) }}">{{ t.refresh }}</a></p>
+    <section class="result-card waiting">
+      <h2>{{ t.waiting_for_response }}</h2>
+      <a class="refresh-link" href="{{ url_for('request_result', request_id=ride_request.id) }}">{{ t.refresh }}</a>
+    </section>
   {% elif ride_request.status == 'accepted' %}
-    <p>{{ t.accepted_response.format(driver_name=ride_request.driver_name, minutes=ride_request.pickup_minutes) }}</p>
-    <p>{{ t.car_description }}: {{ ride_request.driver_car_description }}</p>
-    <p><strong>{{ t.meeting_code }}: {{ ride_request.meeting_code }}</strong></p>
+    <section class="result-card accepted">
+      <h2>{{ t.accepted_response.format(driver_name=ride_request.driver_name, minutes=ride_request.pickup_minutes) }}</h2>
+      <p>{{ t.car_description }}: {{ ride_request.driver_car_description }}</p>
+      <p>{{ t.meeting_code }}</p>
+      <strong class="meeting-code">{{ ride_request.meeting_code }}</strong>
+    </section>
   {% else %}
-    <p>{{ t.declined_response }}</p>
-    <p><a href="{{ url_for('new_request') }}">{{ t.make_another_request }}</a></p>
+    <section class="result-card declined">
+      <h2>{{ t.declined_response }}</h2>
+      <a class="refresh-link" href="{{ url_for('new_request') }}">{{ t.make_another_request }}</a>
+    </section>
   {% endif %}
 {% endblock %}
