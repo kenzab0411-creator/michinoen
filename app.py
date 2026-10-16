@@ -1,3 +1,4 @@
+import os
 import secrets
 from urllib.parse import urlparse
 
@@ -8,7 +9,9 @@ from models import RideRequest
 
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "change-this-before-production"
+app.config["SECRET_KEY"] = os.environ.get(
+    "SECRET_KEY", "change-this-before-production"
+)
 
 
 TRANSLATIONS = {
@@ -238,7 +241,7 @@ def inject_language():
 
 def initialize_database():
     """SQLiteファイルと必要なテーブルを用意する。"""
-    DATABASE_PATH.parent.mkdir(exist_ok=True)
+    DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
     db.connect(reuse_if_open=True)
     db.create_tables([RideRequest])
     add_ride_request_columns()
@@ -469,6 +472,10 @@ def respond_to_request(request_id):
     )
 
 
+# PythonAnywhere の WSGI は app を import して起動するため、import 時にも
+# SQLite ファイル・テーブルを初期化する。
+initialize_database()
+
+
 if __name__ == "__main__":
-    initialize_database()
-    app.run(debug=True)
+    app.run(port=8000, debug=True)
