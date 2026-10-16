@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t.consent_title }} | {{ t.app_name }}{% endblock %}
+
+{% block content %}
+  <section class="consent-card">
+    <div class="consent-icon" aria-hidden="true">🤝</div>
+    <p class="consent-brand">{{ t.app_name }} / MICHI NO EN</p>
+    <h1>{{ t.consent_title }}</h1>
+    <p class="consent-subtitle">{{ t.consent_subtitle }}</p>
+
+    <div class="consent-lead">
+      <span class="consent-check" aria-hidden="true">✓</span>
+      <p>{{ t.consent_lead }}</p>
+    </div>
+
+    <section class="terms">
+      <h2>{{ t.terms_title }}</h2>
+      <ol>
+        {% for number in range(1, 8) %}
+          <li><strong>{{ t['term_' ~ number ~ '_title'] }}</strong> {{ t['term_' ~ number ~ '_body'] }}</li>
+        {% endfor %}
+      </ol>
+    </section>
+
+    <section class="consent-closing">
+      <h2>{{ t.consent_closing }}</h2>
+      <p>{{ t.consent_closing_body }}</p>
+    </section>
+
+    <form method="post">
+      <button class="consent-button" type="submit">{{ t.agree_and_continue }}</button>
+    </form>
+    <p class="consent-note">{{ t.consent_note }}</p>
+
+    <nav class="language-links consent-language" aria-label="{{ t.language }}">
+      <a href="{{ url_for('set_language', locale='ja') }}" {% if locale == 'ja' %}aria-current="page"{% endif %}>日本語</a>
+      <a href="{{ url_for('set_language', locale='en') }}" {% if locale == 'en' %}aria-current="page"{% endif %}>English</a>
+    </nav>
+  </section>
+{% endblock %}

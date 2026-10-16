@@ -14,6 +14,28 @@ app.config["SECRET_KEY"] = "change-this-before-production"
 TRANSLATIONS = {
     "ja": {
         "app_name": "道の縁",
+        "consent_title": "道の縁へようこそ",
+        "consent_subtitle": "利用前にご確認ください",
+        "consent_lead": "「道の縁」は無料の善意による同乗の場であり、移動やマッチングを保証するものではないことを理解しました。利用時は交通ルールを守り、相手の意思を尊重します。",
+        "terms_title": "ご利用にあたって",
+        "term_1_title": "予約・送迎サービスではありません。",
+        "term_1_body": "ドライバーが必ず現れるわけではなく、乗車できる保証もありません。",
+        "term_2_title": "時間の約束はありません。",
+        "term_2_body": "ドライバーがいつ来るかは分かりません。旅の時間に余裕を持って、気長にお待ちください。",
+        "term_3_title": "その場にいなければ、ご縁はそこまで。",
+        "term_3_body": "ドライバーが到着した際に利用者が見当たらなければ、そのまま出発することがあります。待機や連絡の義務はありません。",
+        "term_4_title": "事前登録は不要です。",
+        "term_4_body": "利用者もドライバーも、会員登録せずに利用できます。",
+        "term_5_title": "お金のやり取りはありません。",
+        "term_5_body": "運賃や謝礼を求めたり、支払いを条件にしたりすることは禁止します。",
+        "term_6_title": "乗る・乗せるは、お互いの自由です。",
+        "term_6_body": "不安を感じた場合は、遠慮なくお断りください。",
+        "term_7_title": "安全を最優先に。",
+        "term_7_body": "交通ルールを守り、安全な場所で乗り降りしてください。運転中のスマートフォン操作は禁止です。",
+        "consent_closing": "同じ道なら、ご一緒に。",
+        "consent_closing_body": "出会えたら、それもご縁。出会えなくても、それもご縁。平泉らしい、ゆったりとした旅をお楽しみください。",
+        "agree_and_continue": "同意して利用する",
+        "consent_note": "この同意は、このブラウザ内でのみ保持されます。会員登録は行いません。",
         "tagline": "旅人と、地域の善意をつなぐ、平泉のヒッチハイクアプリ",
         "home_intro": "移動に困っている人と、手助けできる通りすがりのドライバーをつなぎます。",
         "traveler_button": "ヒッチハイクをお願いする",
@@ -91,6 +113,28 @@ TRANSLATIONS = {
     },
     "en": {
         "app_name": "Michi no En",
+        "consent_title": "Welcome to Michi no En",
+        "consent_subtitle": "Please read before using the app",
+        "consent_lead": "I understand that Michi no En is a free, goodwill-based ride-sharing space and does not guarantee transportation or a match. I will follow traffic rules and respect the other person's wishes.",
+        "terms_title": "Before you use the app",
+        "term_1_title": "This is not a booking or transport service.",
+        "term_1_body": "A driver may not be available, and a ride is not guaranteed.",
+        "term_2_title": "There is no promised arrival time.",
+        "term_2_body": "Drivers may arrive at any time. Please allow plenty of time for your journey.",
+        "term_3_title": "If you are not there, the connection may end there.",
+        "term_3_body": "A driver may leave if they cannot find the traveler. Neither person is required to wait or contact the other.",
+        "term_4_title": "No advance registration is required.",
+        "term_4_body": "Travelers and drivers can use the app without creating an account.",
+        "term_5_title": "No money is exchanged.",
+        "term_5_body": "Fares, rewards, or making payment a condition of the ride are prohibited.",
+        "term_6_title": "Both people are free to say no.",
+        "term_6_body": "If you feel uncomfortable, please decline without hesitation.",
+        "term_7_title": "Put safety first.",
+        "term_7_body": "Follow traffic rules, get in and out in safe places, and never use a smartphone while driving.",
+        "consent_closing": "If we're headed the same way, let's go together.",
+        "consent_closing_body": "If you meet, it is a connection. If you do not, that is a connection too. Enjoy a relaxed journey in Hiraizumi.",
+        "agree_and_continue": "I agree and want to continue",
+        "consent_note": "Your agreement is stored only in this browser. No account is created.",
         "tagline": "A Hiraizumi ride board connecting travelers and local goodwill",
         "home_intro": "We connect travelers who need a ride with local drivers who can help.",
         "traveler_button": "Request a hitchhike",
@@ -167,6 +211,20 @@ TRANSLATIONS = {
         "save_result_url_intro": "Save this link to check the driver's response later.",
     },
 }
+
+
+PUBLIC_ENDPOINTS = {"consent", "set_language", "static"}
+
+
+@app.before_request
+def require_consent():
+    if request.endpoint in PUBLIC_ENDPOINTS:
+        return None
+    if session.get("agreed_to_terms"):
+        return None
+    if request.method == "GET":
+        session["after_consent"] = request.full_path
+    return redirect(url_for("consent"))
 
 
 @app.context_processor
@@ -255,6 +313,17 @@ def localized_request_values(ride_request, text):
 @app.route("/")
 def index():
     return render_template("home.html")
+
+
+@app.route("/consent", methods=["GET", "POST"])
+def consent():
+    if request.method == "POST":
+        session["agreed_to_terms"] = True
+        next_page = session.pop("after_consent", url_for("index"))
+        if not next_page.startswith("/") or next_page.startswith("//"):
+            next_page = url_for("index")
+        return redirect(next_page)
+    return render_template("consent.html")
 
 
 @app.route("/driver")
