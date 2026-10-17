@@ -214,7 +214,7 @@ TRANSLATIONS = {
 }
 
 
-PUBLIC_ENDPOINTS = {"consent", "set_language", "static"}
+PUBLIC_ENDPOINTS = {"consent", "set_language", "static", "favicon"}
 
 
 @app.before_request
@@ -314,6 +314,12 @@ def localized_request_values(ride_request, text):
 @app.route("/")
 def index():
     return render_template("home.html")
+
+
+@app.route("/favicon.ico")
+def favicon():
+    """ブラウザが慣例的に要求するサイトアイコンを返す。"""
+    return redirect(url_for("static", filename="favicon.svg"))
 
 
 @app.route("/consent", methods=["GET", "POST"])
