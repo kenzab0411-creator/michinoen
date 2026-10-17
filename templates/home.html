@@ -14,7 +14,10 @@
     <div class="choice-image" aria-label="{{ t.app_name }}">
       <img src="{{ url_for('static', filename='images/ride-choice-cards.png') }}" alt="のりたい、のせたいを選ぶ入口">
       <a class="choice-link traveler-choice" href="{{ url_for('new_request') }}"><span class="sr-only">{{ t.traveler_button }}</span></a>
-      <a class="choice-link driver-choice" href="{{ url_for('driver_portal') }}"><span class="sr-only">{{ t.driver_button }}</span></a>
+      <a class="choice-link driver-choice" href="{{ url_for('driver_portal') }}" {% if pending_request_count %}aria-label="{{ t.driver_button }}: {{ pending_request_count }}"{% endif %}>
+        <span class="sr-only">{{ t.driver_button }}</span>
+        {% if pending_request_count %}<span class="badge request-alert home-request-alert" aria-hidden="true">{{ pending_request_count }}</span>{% endif %}
+      </a>
     </div>
 
     <div class="home-details">
