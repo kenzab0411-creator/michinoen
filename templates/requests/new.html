@@ -37,22 +37,12 @@
     </select>
 
     <label for="pickup_location">{{ t.pickup_location }}</label>
-    <input id="pickup_location" name="pickup_location" value="{{ request.form.get('pickup_location', '') }}" list="pickup-locations" placeholder="{{ t.pickup_location_example }}" maxlength="100" required>
-    <datalist id="pickup-locations">
-      <option value="平泉駅 / Hiraizumi Station">
-      <option value="中尊寺 / Chuson-ji Temple">
-      <option value="毛越寺 / Motsu-ji Temple">
-    </datalist>
+    <input id="pickup_location" name="pickup_location" value="{{ request.form.get('pickup_location', '') }}" placeholder="{{ t.pickup_location_example }}" maxlength="100" required>
     <label for="pickup_map_url">{{ t.pickup_map_url }}</label>
     <input id="pickup_map_url" name="pickup_map_url" value="{{ request.form.get('pickup_map_url', '') }}" type="url" placeholder="https://maps.google.com/..." maxlength="500">
 
     <label for="destination">{{ t.destination }}</label>
-    <input id="destination" name="destination" value="{{ request.form.get('destination', '') }}" list="destinations" placeholder="{{ t.destination_example }}" maxlength="100" required>
-    <datalist id="destinations">
-      <option value="中尊寺 / Chuson-ji Temple">
-      <option value="毛越寺 / Motsu-ji Temple">
-      <option value="平泉駅 / Hiraizumi Station">
-    </datalist>
+    <input id="destination" name="destination" value="{{ request.form.get('destination', '') }}" placeholder="{{ t.destination_example }}" maxlength="100" required>
     <label for="destination_map_url">{{ t.destination_map_url }}</label>
     <input id="destination_map_url" name="destination_map_url" value="{{ request.form.get('destination_map_url', '') }}" type="url" placeholder="https://maps.google.com/..." maxlength="500">
 
