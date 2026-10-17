@@ -15,6 +15,10 @@
     <p>{{ t.response_saved }}</p>
   {% endif %}
 
+  {% if request.args.get('dismissed') %}
+    <p>{{ t.request_hidden }}</p>
+  {% endif %}
+
   {% if ride_requests %}
     <ul class="request-list">
       {% for ride_request in ride_requests %}

@@ -66,6 +66,7 @@ TRANSLATIONS = {
         "decline_request": "今回は見送る",
         "response_error": "承諾する場合は、ニックネーム、車の特徴、迎えの時間を入力してください。",
         "response_saved": "返答を登録しました。",
+        "request_hidden": "このリクエストを一覧から非表示にしました。他のドライバーには対応待ちとして残ります。",
         "status_pending": "対応待ち",
         "status_accepted": "承諾済み",
         "status_declined": "見送り",
@@ -164,6 +165,7 @@ TRANSLATIONS = {
         "decline_request": "Decline",
         "response_error": "When accepting, enter a nickname, car description, and pickup time.",
         "response_saved": "Your response has been saved.",
+        "request_hidden": "This request is hidden from your list. It remains available to other drivers.",
         "status_pending": "Pending",
         "status_accepted": "Accepted",
         "status_declined": "Declined",
@@ -217,6 +219,11 @@ TRANSLATIONS = {
 PUBLIC_ENDPOINTS = {"consent", "set_language", "static", "favicon"}
 
 
+def dismissed_request_ids():
+    """このブラウザのドライバーが見送ったリクエストIDを取得する。"""
+    return {value for value in session.get("dismissed_request_ids", []) if isinstance(value, int)}
+
+
 @app.before_request
 def require_consent():
     if request.endpoint in PUBLIC_ENDPOINTS:
@@ -231,7 +238,11 @@ def require_consent():
 @app.context_processor
 def inject_language():
     locale = session.get("locale", "ja")
-    pending_request_count = RideRequest.select().where(RideRequest.status == "pending").count()
+    pending_requests = RideRequest.select().where(RideRequest.status == "pending")
+    dismissed_ids = dismissed_request_ids()
+    if dismissed_ids:
+        pending_requests = pending_requests.where(RideRequest.id.not_in(dismissed_ids))
+    pending_request_count = pending_requests.count()
     return {
         "locale": locale,
         "t": TRANSLATIONS[locale],
@@ -426,9 +437,15 @@ def render_result_page(ride_request):
 @app.route("/driver/requests")
 def driver_requests():
     all_requests = RideRequest.select().order_by(RideRequest.id.desc())
+    dismissed_ids = dismissed_request_ids()
+    visible_requests = [
+        ride_request
+        for ride_request in all_requests
+        if ride_request.status != "pending" or ride_request.id not in dismissed_ids
+    ]
     return render_template(
         "driver_requests/index.html",
-        ride_requests=all_requests,
+        ride_requests=visible_requests,
     )
 
 
@@ -438,6 +455,8 @@ def respond_to_request(request_id):
         (RideRequest.id == request_id) & (RideRequest.status == "pending")
     )
     if ride_request is None:
+        return redirect(url_for("driver_requests"))
+    if request_id in dismissed_request_ids():
         return redirect(url_for("driver_requests"))
 
     error = None
@@ -456,6 +475,11 @@ def respond_to_request(request_id):
             or not driver_car_description
         ):
             error = TRANSLATIONS[session.get("locale", "ja")]["response_error"]
+        elif decision == "declined":
+            dismissed_ids = dismissed_request_ids()
+            dismissed_ids.add(request_id)
+            session["dismissed_request_ids"] = sorted(dismissed_ids)
+            return redirect(url_for("driver_requests", dismissed="1"))
         else:
             ride_request.status = decision
             ride_request.driver_name = driver_name if decision == "accepted" else None
